@@ -9,7 +9,7 @@ const mangayomiSources = [{
   "itemType": 0,
   "isNsfw": true,
   "hasCloudflare": true,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "dateFormat": "",
   "dateFormatLocale": "",
   "pkgName": "manga/src/zh/wnacg.js"
