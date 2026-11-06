@@ -10,7 +10,7 @@
     "dateFormatLocale": "",
     "isNsfw": true,
     "hasCloudflare": true,
-    "sourceCodeUrl": "https://raw.githubusercontent.com/DECADE0502/mangayomi-extensions/main/javascript/manga/src/zh/wnacg.js",
+    "sourceCodeUrl": "https://cdn.jsdelivr.net/gh/DECADE0502/mangayomi-extensions@main/javascript/manga/src/zh/wnacg.js",
     "apiUrl": "",
     "version": "0.0.3",
     "isManga": true,
