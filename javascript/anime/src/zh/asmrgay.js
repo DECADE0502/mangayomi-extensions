@@ -9,7 +9,7 @@ const mangayomiSources = [{
   "itemType": 1,
   "isNsfw": true,
   "hasCloudflare": false,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "dateFormat": "",
   "dateFormatLocale": "",
   "pkgPath": "anime/src/zh/asmrgay.js"
@@ -45,8 +45,16 @@ class DefaultExtension extends MProvider {
   }
 
   async listDir(path) {
-    const data = await this.api("fs/list", { path: path, password: "", page: 1, per_page: 0, refresh: false });
-    return data.content || [];
+    let lastError = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const data = await this.api("fs/list", { path: path, password: "", page: 1, per_page: 0, refresh: false });
+        return data.content || [];
+      } catch (e) {
+        lastError = e;
+      }
+    }
+    throw lastError;
   }
 
   cnToNum(s) {
@@ -155,18 +163,26 @@ class DefaultExtension extends MProvider {
     return { list: list, hasNextPage: page * perPage < (data.total || 0) };
   }
 
-  async collectAudio(path, out) {
-    const items = await this.listDir(path);
-    const subDirs = [];
-    for (const x of items) {
-      const p = this.joinPath(path, x.name);
-      if (x.is_dir) {
-        subDirs.push(p);
-      } else if (AUDIO_EXT.test(x.name)) {
-        out.push({ path: p, name: x.name, parent: path, modified: x.modified, size: x.size });
+  async collectAudio(root, out) {
+    const queue = [];
+    const handle = async (path) => {
+      const items = await this.listDir(path);
+      for (const x of items) {
+        const p = this.joinPath(path, x.name);
+        if (x.is_dir) {
+          queue.push(p);
+        } else if (AUDIO_EXT.test(x.name)) {
+          out.push({ path: p, name: x.name, parent: path, modified: x.modified, size: x.size });
+        }
       }
-    }
-    await Promise.all(subDirs.map(p => this.collectAudio(p, out)));
+    };
+    const worker = async () => {
+      while (queue.length > 0) {
+        await handle(queue.shift());
+      }
+    };
+    await handle(root);
+    await Promise.all([worker(), worker(), worker(), worker()]);
   }
 
   async getDetail(url) {
