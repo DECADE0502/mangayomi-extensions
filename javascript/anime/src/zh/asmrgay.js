@@ -9,7 +9,7 @@ const mangayomiSources = [{
   "itemType": 1,
   "isNsfw": true,
   "hasCloudflare": false,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "dateFormat": "",
   "dateFormatLocale": "",
   "pkgPath": "anime/src/zh/asmrgay.js"
@@ -34,27 +34,27 @@ class DefaultExtension extends MProvider {
   }
 
   async api(endpoint, body) {
-    const res = await new Client().post(
-      `${this.getBaseUrl()}/api/${endpoint}`,
-      { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
-      body
-    );
-    const data = JSON.parse(res.body);
-    if (data.code != 200) throw new Error(data.message);
-    return data.data;
-  }
-
-  async listDir(path) {
     let lastError = null;
-    for (let attempt = 0; attempt < 3; attempt++) {
+    for (let attempt = 0; attempt < 4; attempt++) {
       try {
-        const data = await this.api("fs/list", { path: path, password: "", page: 1, per_page: 0, refresh: false });
-        return data.content || [];
+        const res = await new Client().post(
+          `${this.getBaseUrl()}/api/${endpoint}`,
+          { "Content-Type": "application/json", "User-Agent": "Mozilla/5.0" },
+          body
+        );
+        const data = JSON.parse(res.body);
+        if (data.code != 200) throw new Error(data.message);
+        return data.data;
       } catch (e) {
         lastError = e;
       }
     }
     throw lastError;
+  }
+
+  async listDir(path) {
+    const data = await this.api("fs/list", { path: path, password: "", page: 1, per_page: 0, refresh: false });
+    return data.content || [];
   }
 
   cnToNum(s) {
